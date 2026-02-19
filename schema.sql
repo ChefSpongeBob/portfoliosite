@@ -1,0 +1,7 @@
+CREATE TABLE readings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id TEXT NOT NULL,
+    sensor_type TEXT NOT NULL,
+    value REAL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);

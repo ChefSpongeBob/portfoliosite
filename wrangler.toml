@@ -1,0 +1,13 @@
+name = "my-svelte-site"
+main = "build/index.js"
+compatibility_date = "2026-02-19"
+
+[build]
+command = "npm run build"
+[build.upload]
+format = "service-worker"
+
+[[d1_databases]]
+binding = "iot_database"
+database_name = "iot_database"
+database_id = "3583b9ab-cc5a-4754-9951-66077993bdfd"
