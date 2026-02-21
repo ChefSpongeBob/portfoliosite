@@ -257,7 +257,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+
+    /* keep desktop roomy by default */
     padding: 0 2rem;
+
     position: relative;
     z-index: 1;
   }
@@ -285,27 +288,41 @@
      Content
   ========================= */
   .page-content {
-    padding: 2rem;
+    /* CHANGE #1: make padding scale via a variable */
+    padding: var(--content-pad, 2rem);
     position: relative;
     z-index: 1;
   }
 
   /* =========================
      Mobile: ALWAYS rail (72px), expanded sidebar overlays content
-     - app-shell stays at 72px margin-left so content doesn't get crushed
+     + tighter padding so cards don't look "buffed"
   ========================= */
   @media (max-width: 767px) {
-    .app-shell {
-      margin-left: 72px !important;
+    /* CHANGE #2: reduce content padding on mobile */
+    .page-content {
+      --content-pad: 1rem;
     }
 
     .header-inner {
       padding: 0 1.25rem;
     }
 
-    /* Even when expanded, sidebar overlays rather than pushing content */
+    /* On mobile, keep content offset for the rail */
+    .app-shell {
+      margin-left: 72px !important;
+    }
+
+    /* Visual pop when expanded overlays content */
     .sidebar {
       box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  /* Extra-tight phones */
+  @media (max-width: 420px) {
+    .page-content {
+      --content-pad: 0.75rem;
     }
   }
 </style>
