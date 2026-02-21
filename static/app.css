@@ -1,0 +1,189 @@
+:root {
+  --color-bg: #0a0a0a;
+  --color-primary: #a13aaa;
+  --color-text: #e0e0e0;
+  --color-muted: #888888;
+  --color-card-bg: #121212;
+  --color-border: #222222;
+
+  /* pop */
+  --outline: 0 0 0 1px rgba(255,255,255,0.05);
+  --shadow-1: 0 10px 24px rgba(0,0,0,0.45);
+  --shadow-2: 0 18px 45px rgba(0,0,0,0.55);
+
+  /* ambient glow accents */
+  --glow-a: rgba(161, 58, 170, 0.10); /* purple */
+  --glow-b: rgba(43, 179, 255, 0.08); /* cyan */
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--color-text);
+  margin: 0;
+  min-height: 100vh;
+
+  /* IMPORTANT: let +layout.svelte (app-shell) background show */
+  background: transparent;
+
+  overflow-x: hidden;
+}
+
+/* ==============================
+   App Shell Background
+   Requires: /static/images/circuit-traces.webp
+============================== */
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+/* Circuit trace layer (subtle + slightly luminous) */
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: url("/images/circuit-traces.webp");
+  background-repeat: repeat;
+  background-size: 560px;
+
+  opacity: 0.14; /* tuned a touch more subtle */
+  pointer-events: none;
+  z-index: 0;
+
+  /* glow / clarity */
+  filter:
+    drop-shadow(0 0 14px rgba(161, 58, 170, 0.14))
+    drop-shadow(0 0 10px rgba(43, 179, 255, 0.10))
+    contrast(1.05);
+
+  /* gives a gentle “lit trace” vibe without brightening the whole page */
+  mix-blend-mode: screen;
+}
+
+/* Soft ambient glow wash (low, no blowouts) */
+.app-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      900px 700px at 18% 22%,
+      var(--glow-a),
+      transparent 66%
+    ),
+    radial-gradient(
+      1100px 900px at 82% 76%,
+      var(--glow-b),
+      transparent 72%
+    );
+
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content stays above background layers */
+.app-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Links */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+button {
+  background-color: rgba(18,18,18,0.90);
+  color: var(--color-text);
+  border: 1px solid rgba(255,255,255,0.10);
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--outline), var(--shadow-1);
+  transition: transform 140ms ease,
+              box-shadow 140ms ease,
+              border-color 140ms ease,
+              color 140ms ease,
+              background-color 140ms ease;
+}
+
+button:hover {
+  background-color: rgba(26,26,26,0.95);
+  border-color: rgba(161,58,170,0.45);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--outline), var(--shadow-2);
+}
+
+/* Cards */
+.card {
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.05),
+    rgba(255,255,255,0.02)
+  );
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 14px;
+  padding: 1rem;
+  margin: 1rem 0;
+  box-shadow: var(--outline), var(--shadow-2);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text);
+}
+
+/* Material icons */
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  min-width: 24px;
+  color: var(--color-text);
+}
+
+/* Graphs / Gauges placeholder */
+.graph, .gauge {
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.05),
+    rgba(255,255,255,0.02)
+  );
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: var(--outline), var(--shadow-2);
+}
+
+/* Focus */
+:focus-visible {
+  outline: 2px solid rgba(161,58,170,0.55);
+  outline-offset: 3px;
+}
