@@ -22,7 +22,8 @@
   }
 </script>
 
-<footer class="footer">
+<!-- CHANGE: forward any attributes (including class) from parent -->
+<footer class="footer" {...$$restProps}>
   <!-- glow + circuit layers (safe, non-fixed) -->
   <div class="fx fx-circuit" aria-hidden="true"></div>
   <div class="fx fx-glow" aria-hidden="true"></div>
@@ -119,7 +120,7 @@
 
   <div class="footer-bottom">
     <span>© {year} CharlottesNexus. All rights reserved.</span>
-    <span class="made">Built with SvelteKit + Cloudflare</span>
+    <span class="made">Built with VSC/GITHUB/CLOUDFLARE</span>
   </div>
 </footer>
 
@@ -285,6 +286,7 @@
     padding: 0.55rem 0.75rem;
     color: rgba(255,255,255,0.9);
     outline: none;
+    min-width: 0;
   }
 
   .newsletter-form input:focus {
@@ -341,6 +343,7 @@
     align-items: center;
     font-size: 0.85rem;
     color: rgba(255,255,255,0.5);
+    gap: 0.75rem;
   }
 
   .made {

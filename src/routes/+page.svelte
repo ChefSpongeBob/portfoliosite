@@ -1,3 +1,4 @@
+<!-- src/routes/+page.svelte -->
 <script lang="ts">
   import Graph from '$lib/components/Graph.svelte';
   import Gauge from '$lib/components/Gauge.svelte';
@@ -114,7 +115,7 @@
 
 <style>
 .page-layout {
-  margin-left: 60px;
+  /* EDIT: removed per-page margin-left hack that conflicts with the 72px rail */
   padding: 2rem;
   display: flex;
   flex-direction: column;

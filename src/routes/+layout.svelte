@@ -66,9 +66,8 @@
     />
   {/if}
 
-  <!-- Sidebar: always visible rail; expands over content on mobile -->
+  <!-- Sidebar: fixed overlay; expands over content; rail always visible -->
   <aside class="sidebar {collapsed ? 'collapsed' : ''}">
-    <!-- Spider button (acts as both hamburger + collapse) -->
     <button class="sidebar-toggle" on:click={toggleCollapse} aria-label="Toggle sidebar">
       <span class="material-icons">bug_report</span>
     </button>
@@ -92,7 +91,6 @@
     </div>
   </aside>
 
-  <!-- Main content -->
   <main class="app-shell">
     <header class="site-header">
       <div class="header-inner">
@@ -108,29 +106,34 @@
       <slot />
     </div>
 
-    <Footer />
+    <Footer class="site-footer" />
   </main>
 </div>
 
 <style>
-  /* =========================
-     Layout
-  ========================= */
+  :global(:root) {
+    --header-h: 64px;
+
+    /* Always-clear rail width so cards never sit under collapsed sidebar */
+    --rail-w: 72px;
+
+    /* Sidebar expanded width (allowed to overlay content) */
+    --sidebar-w: 240px;
+  }
+
   .layout {
     display: flex;
     min-height: 100vh;
   }
 
-  /* =========================
-     Sidebar
-  ========================= */
+  /* Sidebar: fixed overlay, under header/footer, above page content */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
 
-    width: 240px;
+    width: var(--sidebar-w);
     background: #121212;
     border-right: 1px solid #222;
 
@@ -142,10 +145,13 @@
   }
 
   .sidebar.collapsed {
-    width: 72px;
+    width: var(--rail-w);
   }
 
+  /* Keep spider button visible under sticky header */
   .sidebar-toggle {
+    margin-top: var(--header-h);
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -209,41 +215,28 @@
     opacity: 1;
   }
 
-  /* =========================
-     Mobile overlay (only when expanded on mobile)
-  ========================= */
+  /* Mobile overlay: below sidebar, above page content */
   .overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.35);
-    z-index: 2500; /* behind sidebar (3000) but above app content */
+    z-index: 2500;
   }
 
-  /* =========================
-     App Shell (layout only)
-     Background is handled in app.css
-  ========================= */
+  /* App shell should NOT be pushed by sidebar */
   .app-shell {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-
-    margin-left: 240px;
-    transition: margin-left 0.24s ease;
+    margin-left: 0; /* important: no push */
   }
 
-  .sidebar.collapsed ~ .app-shell {
-    margin-left: 72px;
-  }
-
-  /* =========================
-     Header (always visible)
-  ========================= */
+  /* Header sits above sidebar */
   .site-header {
     position: sticky;
     top: 0;
-    z-index: 2000;
+    z-index: 4000; /* above sidebar */
 
     background: rgba(8, 8, 8, 0.82);
     backdrop-filter: blur(10px);
@@ -252,15 +245,12 @@
   }
 
   .header-inner {
-    height: 64px;
+    height: var(--header-h);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-
-    /* keep desktop roomy by default */
     padding: 0 2rem;
-
     position: relative;
     z-index: 1;
   }
@@ -284,22 +274,21 @@
     letter-spacing: 0.01em;
   }
 
-  /* =========================
-     Content
-  ========================= */
+  /* Content: ALWAYS clears the rail; does not react to collapsed/expanded */
   .page-content {
-    /* CHANGE #1: make padding scale via a variable */
     padding: var(--content-pad, 2rem);
+    padding-left: calc(var(--rail-w) + var(--content-pad, 2rem));
     position: relative;
-    z-index: 1;
+    z-index: 1; /* below sidebar */
   }
 
-  /* =========================
-     Mobile: ALWAYS rail (72px), expanded sidebar overlays content
-     + tighter padding so cards don't look "buffed"
-  ========================= */
+  /* Footer sits above sidebar */
+  :global(.site-footer) {
+    position: relative;
+    z-index: 4000; /* above sidebar */
+  }
+
   @media (max-width: 767px) {
-    /* CHANGE #2: reduce content padding on mobile */
     .page-content {
       --content-pad: 1rem;
     }
@@ -308,18 +297,11 @@
       padding: 0 1.25rem;
     }
 
-    /* On mobile, keep content offset for the rail */
-    .app-shell {
-      margin-left: 72px !important;
-    }
-
-    /* Visual pop when expanded overlays content */
     .sidebar {
       box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55);
     }
   }
 
-  /* Extra-tight phones */
   @media (max-width: 420px) {
     .page-content {
       --content-pad: 0.75rem;
