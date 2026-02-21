@@ -4,9 +4,10 @@
   import { onMount } from "svelte";
   import Footer from "$lib/components/Footer.svelte";
 
-  let collapsed = false; // sidebar collapsed (desktop)
-  let sidebarOpen = false; // mobile open
-  let width = 0; // viewport width
+  let collapsed = false; // desktop + mobile rail mode
+  let width = 0;
+
+  const BREAKPOINT = 768;
 
   $: currentPath = $page.url.pathname;
 
@@ -20,30 +21,54 @@
 
   $: pageTitle = currentItem ? currentItem.label : "";
 
+  $: isMobile = width > 0 && width < BREAKPOINT;
+
   function toggleCollapse() {
-    if (width < 768) {
-      sidebarOpen = !sidebarOpen;
-    } else {
-      collapsed = !collapsed;
-    }
+    collapsed = !collapsed;
   }
 
-  function closeSidebar() {
-    sidebarOpen = false;
+  function collapseSidebar() {
+    collapsed = true;
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape" && isMobile && !collapsed) collapseSidebar();
+  }
+
+  function reconcileOnResize() {
+    width = window.innerWidth;
+
+    // On mobile, default to collapsed rail so content isn't crushed.
+    if (width < BREAKPOINT) collapsed = true;
   }
 
   onMount(() => {
-    width = window.innerWidth;
-    const resizeHandler = () => (width = window.innerWidth);
-    window.addEventListener("resize", resizeHandler);
-    return () => window.removeEventListener("resize", resizeHandler);
+    reconcileOnResize();
+    window.addEventListener("resize", reconcileOnResize);
+    window.addEventListener("keydown", onKeydown);
+    return () => {
+      window.removeEventListener("resize", reconcileOnResize);
+      window.removeEventListener("keydown", onKeydown);
+    };
   });
 </script>
 
 <div class="layout">
-  <!-- Sidebar -->
-  <aside class="sidebar {collapsed ? 'collapsed' : ''}" class:open={sidebarOpen}>
-    <!-- Spider / collapse button inside sidebar -->
+  <!-- Mobile overlay (only when expanded on mobile; click outside collapses) -->
+  {#if isMobile && !collapsed}
+    <div
+      class="overlay"
+      role="button"
+      tabindex="0"
+      aria-label="Collapse sidebar"
+      on:click={collapseSidebar}
+      on:keydown={(e) => (e.key === "Enter" || e.key === " ") && collapseSidebar()}
+    />
+  {/if}
+
+  <!-- Sidebar: always visible rail; expands over content on mobile -->
+  <aside class="sidebar {collapsed ? 'collapsed' : ''}">
+    <!-- Spider button (acts as both hamburger + collapse) -->
     <button class="sidebar-toggle" on:click={toggleCollapse} aria-label="Toggle sidebar">
       <span class="material-icons">bug_report</span>
     </button>
@@ -53,33 +78,22 @@
         <a
           href={item.route}
           class="side-item {currentPath.startsWith(item.route) ? 'active' : ''}"
-          on:click={closeSidebar}
+          on:click={() => isMobile && !collapsed && collapseSidebar()}
         >
           <span class="icon material-icons">{item.icon}</span>
+
           {#if !collapsed}
             <span class="label">{item.label}</span>
           {/if}
+
           <span class="active-indicator"></span>
         </a>
       {/each}
     </div>
   </aside>
 
-  <!-- Mobile overlay -->
-  {#if sidebarOpen && width < 768}
-    <div
-      class="overlay"
-      role="button"
-      tabindex="0"
-      aria-label="Close sidebar"
-      on:click={closeSidebar}
-      on:keydown={(e) => (e.key === "Enter" || e.key === " ") && closeSidebar()}
-    ></div>
-  {/if}
-
   <!-- Main content -->
   <main class="app-shell">
-    <!-- Consistent Header -->
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href="/">CharlottesNexus</a>
@@ -93,6 +107,7 @@
     <div class="page-content">
       <slot />
     </div>
+
     <Footer />
   </main>
 </div>
@@ -114,18 +129,16 @@
     top: 0;
     left: 0;
     bottom: 0;
+
     width: 240px;
     background: #121212;
     border-right: 1px solid #222;
-    transform: translateX(-100%);
-    transition: transform 0.24s ease, width 0.24s ease;
-    z-index: 1050;
+
+    transition: width 0.24s ease;
+    z-index: 3000;
+
     display: flex;
     flex-direction: column;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
   }
 
   .sidebar.collapsed {
@@ -197,14 +210,13 @@
   }
 
   /* =========================
-     Mobile overlay
+     Mobile overlay (only when expanded on mobile)
   ========================= */
   .overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.35);
-    z-index: 1000;
-    transition: opacity 0.3s ease;
+    z-index: 2500; /* behind sidebar (3000) but above app content */
   }
 
   /* =========================
@@ -215,9 +227,10 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+
     margin-left: 240px;
     transition: margin-left 0.24s ease;
-    min-height: 100vh;
   }
 
   .sidebar.collapsed ~ .app-shell {
@@ -235,8 +248,6 @@
     background: rgba(8, 8, 8, 0.82);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-
-    /* keep header above any global background layers */
     isolation: isolate;
   }
 
@@ -247,7 +258,6 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 0 2rem;
-
     position: relative;
     z-index: 1;
   }
@@ -277,26 +287,25 @@
   .page-content {
     padding: 2rem;
     position: relative;
-    z-index: 1; /* stays above app.css background layers */
+    z-index: 1;
   }
 
-  /* Desktop: sidebar always visible, overlay hidden */
-  @media (min-width: 768px) {
-    .sidebar {
-      transform: translateX(0);
-    }
-    .overlay {
-      display: none;
-    }
-  }
-
-  /* Mobile adjustments */
+  /* =========================
+     Mobile: ALWAYS rail (72px), expanded sidebar overlays content
+     - app-shell stays at 72px margin-left so content doesn't get crushed
+  ========================= */
   @media (max-width: 767px) {
     .app-shell {
-      margin-left: 0;
+      margin-left: 72px !important;
     }
+
     .header-inner {
       padding: 0 1.25rem;
+    }
+
+    /* Even when expanded, sidebar overlays rather than pushing content */
+    .sidebar {
+      box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55);
     }
   }
 </style>
