@@ -28,14 +28,6 @@
 </script>
 
 <div class="page-layout">
-
-  <!-- ========================= -->
-  <!-- TOP BANNER (CAROUSEL)    -->
-  <!-- ========================= -->
-  <div class="banner-row">
-    <Carousel slides={homeSlides} interval={8000} />
-  </div>
-
   <!-- ========================= -->
   <!-- HERO + LIVE DATA ROW     -->
   <!-- ========================= -->
@@ -63,6 +55,14 @@
         </div>
       </Card>
     </div>
+    
+  <!-- ========================= -->
+  <!-- TOP BANNER (CAROUSEL)    -->
+  <!-- ========================= -->
+  <div class="banner-row">
+    <Carousel slides={homeSlides} interval={8000} />
+  </div>
+
 
     <!-- LIVE DATA -->
     <aside class="data-column">

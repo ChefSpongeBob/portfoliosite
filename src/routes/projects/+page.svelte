@@ -97,9 +97,9 @@
 
   <Card title="Collaboration">
     <p>
-      Whether you're building a device, modernizing infrastructure,
-      or developing a full SaaS layer around real-world telemetry,
-      this is the development zone.
+      We’re always open to discussing new projects and collaborations. If you
+      have an idea or opportunity that aligns with our expertise, please
+      <a href="/contact" class="underline">get in touch</a>.
     </p>
   </Card>
 </section>
